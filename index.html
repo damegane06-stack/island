@@ -1,0 +1,1278 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#b7dbf4">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="作業島">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<title>作業島</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --sky-a:#b7dbf4; --sky-b:#e4eff8; --sky-c:#fbe5d8;
+    --ink:#1b2130; --ink-2:#4e596b; --ink-3:#8a93a2;
+    --glass:rgba(255,255,255,.72); --glass-2:rgba(255,255,255,.92);
+    --edge:rgba(27,33,48,.11); --ghost:rgba(27,33,48,.05);
+    --panel:#ffffff; --star:0;
+    --orb:#fff7dc; --orb-glow:rgba(255,232,160,.5);
+    --shadow:0 10px 30px -12px rgba(30,40,70,.38);
+    --hot:#b8514a;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --sky-a:#060b22; --sky-b:#141b45; --sky-c:#35285a;
+      --ink:#eef1f8; --ink-2:#b3bbcc; --ink-3:#7f889b;
+      --glass:rgba(18,22,40,.7); --glass-2:rgba(24,28,50,.92);
+      --edge:rgba(255,255,255,.13); --ghost:rgba(255,255,255,.06);
+      --panel:#161a2c; --star:1;
+      --orb:#eef0ff; --orb-glow:rgba(160,178,255,.32);
+      --shadow:0 12px 34px -12px rgba(0,0,0,.75);
+      --hot:#ef8a80;
+    }
+  }
+  :root[data-theme="dark"]{
+    --sky-a:#060b22; --sky-b:#141b45; --sky-c:#35285a;
+    --ink:#eef1f8; --ink-2:#b3bbcc; --ink-3:#7f889b;
+    --glass:rgba(18,22,40,.7); --glass-2:rgba(24,28,50,.92);
+    --edge:rgba(255,255,255,.13); --ghost:rgba(255,255,255,.06);
+    --panel:#161a2c; --star:1;
+    --orb:#eef0ff; --orb-glow:rgba(160,178,255,.32);
+    --shadow:0 12px 34px -12px rgba(0,0,0,.75);
+    --hot:#ef8a80;
+  }
+  /* 昼／夜ボタンで切り替えたとき（島の空と画面の色を揃える） */
+  body.is-day{
+    --sky-a:#b7dbf4; --sky-b:#e4eff8; --sky-c:#fbe5d8;
+    --ink:#1b2130; --ink-2:#4e596b; --ink-3:#8a93a2;
+    --glass:rgba(255,255,255,.72); --glass-2:rgba(255,255,255,.92);
+    --edge:rgba(27,33,48,.11); --ghost:rgba(27,33,48,.05);
+    --panel:#ffffff; --star:0;
+    --orb:#fff7dc; --orb-glow:rgba(255,232,160,.5);
+    --shadow:0 10px 30px -12px rgba(30,40,70,.38);
+    --hot:#b8514a;
+  }
+  body.is-night{
+    --sky-a:#060b22; --sky-b:#141b45; --sky-c:#35285a;
+    --ink:#eef1f8; --ink-2:#b3bbcc; --ink-3:#7f889b;
+    --glass:rgba(18,22,40,.7); --glass-2:rgba(24,28,50,.92);
+    --edge:rgba(255,255,255,.13); --ghost:rgba(255,255,255,.06);
+    --panel:#161a2c; --star:1;
+    --orb:#eef0ff; --orb-glow:rgba(160,178,255,.32);
+    --shadow:0 12px 34px -12px rgba(0,0,0,.75);
+    --hot:#ef8a80;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%;overflow:hidden}
+  body{
+    margin:0;background:var(--sky-b);color:var(--ink);
+    font-family:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  button{font:inherit;color:inherit}
+  :focus-visible{outline:2px solid var(--ink-2);outline-offset:3px}
+
+  /* ── 空 ── */
+  .sky{position:fixed;inset:0;z-index:0;
+    background:linear-gradient(180deg,var(--sky-a) 0%,var(--sky-b) 56%,var(--sky-c) 100%);
+    transition:background 1s}
+  .orb{position:fixed;z-index:0;width:150px;height:150px;border-radius:50%;
+    right:22%;top:9%;pointer-events:none;
+    background:radial-gradient(circle,var(--orb) 0 30%,var(--orb-glow) 33%,transparent 68%)}
+  .stars{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:var(--star);
+    transition:opacity 1.2s;
+    background-image:
+      radial-gradient(1.4px 1.4px at 8% 14%,#fff 50%,transparent 52%),
+      radial-gradient(1px 1px at 17% 32%,#fff 50%,transparent 52%),
+      radial-gradient(1.6px 1.6px at 26% 9%,#fff 50%,transparent 52%),
+      radial-gradient(1px 1px at 34% 22%,#dfe4ff 50%,transparent 52%),
+      radial-gradient(1.2px 1.2px at 44% 6%,#fff 50%,transparent 52%),
+      radial-gradient(1px 1px at 52% 27%,#fff 50%,transparent 52%),
+      radial-gradient(1.5px 1.5px at 61% 12%,#fff6d8 50%,transparent 52%),
+      radial-gradient(1px 1px at 69% 30%,#fff 50%,transparent 52%),
+      radial-gradient(1.3px 1.3px at 83% 7%,#fff 50%,transparent 52%),
+      radial-gradient(1px 1px at 91% 24%,#fff 50%,transparent 52%),
+      radial-gradient(1.2px 1.2px at 12% 58%,#fff 50%,transparent 52%),
+      radial-gradient(1px 1px at 88% 52%,#fff 50%,transparent 52%),
+      radial-gradient(1.4px 1.4px at 94% 70%,#dfe4ff 50%,transparent 52%),
+      radial-gradient(1px 1px at 5% 80%,#fff 50%,transparent 52%),
+      radial-gradient(1.2px 1.2px at 40% 40%,#fff 50%,transparent 52%),
+      radial-gradient(1px 1px at 76% 44%,#fff 50%,transparent 52%);
+    animation:twinkle 6s ease-in-out infinite alternate}
+  @keyframes twinkle{to{filter:brightness(.55)}}
+
+  #stage{position:fixed;inset:0;z-index:1;display:block;width:100%;height:100%;
+    touch-action:none;cursor:grab;outline:none}
+  #stage.dragging{cursor:grabbing}
+  #stage.pointing{cursor:pointer}
+
+  /* ── 左上の見出し ── */
+  .hud{position:fixed;z-index:30;pointer-events:none;
+    top:calc(20px + env(safe-area-inset-top,0px));left:24px;
+    max-width:min(360px,calc(100vw - 170px))}
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.34em;
+    color:var(--ink-3);display:flex;align-items:center;gap:10px}
+  .eyebrow::after{content:"";width:34px;height:1px;background:var(--edge)}
+  .hud h1{margin:8px 0 10px;font-weight:900;font-size:clamp(40px,7.5vw,72px);
+    line-height:.95;letter-spacing:.03em}
+  .hud p{margin:0;font-size:13.5px;line-height:1.75;color:var(--ink-2);text-shadow:0 0 10px var(--sky-a),0 0 3px var(--sky-a)}
+  .tally{margin-top:12px;display:flex;gap:16px;flex-wrap:wrap;
+    font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.12em;color:var(--ink-3)}
+  .tally b{font-family:"Zen Kaku Gothic New",sans-serif;font-weight:900;font-size:16px;
+    color:var(--ink);letter-spacing:0;margin-left:5px}
+  .tally .hot b{color:var(--hot)}
+
+  /* ── 右上の道具 ── */
+  .tools{position:fixed;z-index:30;display:flex;gap:8px;
+    top:calc(20px + env(safe-area-inset-top,0px));right:18px}
+  .tool{width:42px;height:42px;border-radius:50%;cursor:pointer;
+    display:grid;place-items:center;border:1px solid var(--edge);
+    background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    box-shadow:var(--shadow);transition:transform .18s cubic-bezier(.3,1.5,.5,1)}
+  .tool:hover{transform:translateY(-2px)}
+  .tool:active{transform:scale(.93)}
+  .tool svg{width:18px;height:18px}
+
+  /* ── 建物の名札 ── */
+  .pins{position:fixed;inset:0;z-index:20;pointer-events:none;overflow:hidden}
+  .pin{position:absolute;left:0;top:0;pointer-events:auto;cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+    padding:4px 11px 4px 6px;border-radius:999px;
+    font-size:12px;font-weight:700;letter-spacing:.02em;
+    background:var(--glass-2);border:1px solid var(--edge);color:var(--ink);
+    box-shadow:0 4px 14px -6px rgba(20,30,60,.4);
+    transform-origin:50% 100%;will-change:transform;
+    transition:background .2s,color .2s,opacity .25s}
+  .pin i{width:15px;height:15px;border-radius:50%;background:var(--tone);
+    border:2.5px solid var(--deep);flex:none}
+  .pin::after{content:"";position:absolute;left:50%;top:100%;width:1.5px;height:var(--stem,9px);
+    margin-left:-.75px;background:var(--deep);opacity:.55}
+  .pin.hot{background:var(--deep);color:var(--tone);border-color:transparent}
+  .pin.hot i{background:var(--tone);border-color:var(--tone)}
+  .pin.dim{opacity:.28}
+  .pin.flag{box-shadow:0 0 0 2px var(--hot),0 4px 14px -6px rgba(20,30,60,.4)}
+
+  /* ── 下の一覧 ── */
+  .dock{position:fixed;z-index:30;left:0;right:0;display:flex;justify-content:center;
+    bottom:calc(16px + env(safe-area-inset-bottom,0px));pointer-events:none;
+    transition:opacity .25s,transform .35s}
+  .dock-in{pointer-events:auto;display:flex;gap:4px;padding:6px;border-radius:999px;
+    max-width:calc(100vw - 24px);overflow-x:auto;scrollbar-width:none;
+    background:var(--glass);border:1px solid var(--edge);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:var(--shadow)}
+  .dock-in::-webkit-scrollbar{display:none}
+  .chip{flex:none;border:0;background:none;cursor:pointer;
+    display:inline-flex;align-items:center;gap:7px;padding:7px 13px 7px 9px;border-radius:999px;
+    font-size:12.5px;font-weight:700;color:var(--ink-2);transition:background .18s,color .18s}
+  .chip i{width:9px;height:9px;border-radius:50%;background:var(--deep);flex:none}
+  @media (min-width:641px){ body.sheet-open .dock{padding-right:432px} }
+  .chip:hover,.chip.hot{background:var(--tone);color:var(--deep)}
+
+  /* ── 開いたところ ── */
+  .sheet{position:fixed;z-index:60;overflow-y:auto;overscroll-behavior:contain;
+    top:calc(74px + env(safe-area-inset-top,0px));right:16px;
+    bottom:calc(16px + env(safe-area-inset-bottom,0px));
+    width:min(400px,calc(100vw - 32px));
+    background:var(--panel);border:1px solid var(--edge);border-radius:24px;
+    box-shadow:0 24px 60px -20px rgba(10,16,40,.55);
+    transform:translateX(calc(100% + 40px));visibility:hidden;
+    transition:transform .5s cubic-bezier(.2,.9,.25,1),visibility 0s .5s}
+  .sheet.on{transform:none;visibility:visible;transition:transform .5s cubic-bezier(.2,.9,.25,1),visibility 0s}
+  .s-top{position:relative;overflow:hidden;background:var(--tone);padding:24px 24px 22px}
+  .s-top .blob{position:absolute;right:-50px;top:-56px;width:220px;height:220px;
+    background:var(--deep);opacity:.13;border-radius:58% 42% 38% 62% / 46% 54% 46% 54%}
+  .s-art{position:relative;width:62px;height:62px;color:var(--deep);margin-bottom:10px}
+  .s-art svg{width:62px;height:62px;display:block;overflow:visible}
+  .s-place{position:relative;font-family:"IBM Plex Mono",monospace;font-size:10px;
+    letter-spacing:.2em;color:var(--deep);opacity:.7;margin-bottom:4px}
+  .s-top h2{position:relative;margin:0;font-weight:900;font-size:24px;line-height:1.3;
+    color:var(--deep);padding-right:40px}
+  .s-top .sub{position:relative;margin:6px 0 0;font-size:13px;line-height:1.6;color:var(--deep);opacity:.8}
+  .x{position:absolute;right:14px;top:14px;z-index:2;width:34px;height:34px;border-radius:50%;
+    cursor:pointer;display:grid;place-items:center;font-size:17px;line-height:1;
+    color:var(--deep);border:1px solid color-mix(in srgb,var(--deep) 30%,transparent);
+    background:color-mix(in srgb,var(--deep) 8%,transparent);transition:transform .2s}
+  .x:hover{transform:rotate(90deg)}
+  .s-body{padding:20px 24px 26px;display:flex;flex-direction:column;gap:14px}
+  .full{margin:0;font-size:14px;line-height:1.8;color:var(--ink-2)}
+  .callout{font-size:13px;line-height:1.7;border-radius:12px;padding:12px 14px;color:var(--ink-2);
+    background:color-mix(in srgb,var(--tone) 42%,transparent)}
+  .callout.hot{background:color-mix(in srgb,#c2564d 14%,transparent)}
+  .lines{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px}
+  .lines li{position:relative;padding-left:17px;font-size:13px;line-height:1.7;color:var(--ink-2)}
+  .lines li::before{content:"";position:absolute;left:3px;top:.78em;width:5px;height:5px;
+    border-radius:50%;background:var(--deep);opacity:.65}
+  .openbtn{display:flex;align-items:center;justify-content:center;gap:8px;padding:15px;
+    border-radius:14px;text-decoration:none;background:var(--deep);color:var(--tone);
+    font-weight:900;font-size:15px;letter-spacing:.05em;transition:opacity .16s,transform .16s}
+  .openbtn:hover{opacity:.88}
+  .openbtn:active{transform:scale(.985)}
+  .limits{border:1px dashed var(--edge);border-radius:12px;padding:11px 14px}
+  .limits-h{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.16em;
+    color:var(--ink-3);margin-bottom:6px}
+  .limits ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}
+  .limits li{position:relative;padding-left:15px;font-size:12.5px;line-height:1.6;color:var(--ink-2)}
+  .limits li::before{content:"×";position:absolute;left:2px;top:0;font-size:11px;color:var(--ink-3)}
+  .kv{display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--edge);padding-top:14px}
+  .kvrow{display:flex;gap:12px;align-items:baseline;font-size:13px}
+  .kvrow .k{flex:0 0 62px;font-family:"IBM Plex Mono",monospace;font-size:9.5px;
+    letter-spacing:.16em;color:var(--ink-3)}
+  .kvrow .v{flex:1;min-width:0;color:var(--ink-2)}
+  .kvrow .v b{color:var(--ink)}
+  .choices{display:flex;flex-direction:column;gap:10px}
+  .choice{border-radius:14px;padding:14px 15px;background:color-mix(in srgb,var(--tone) 38%,transparent);
+    display:flex;flex-direction:column;gap:8px}
+  .c-name{font-weight:900;font-size:16px;color:var(--ink)}
+  .c-sub{margin:0;font-size:12.5px;line-height:1.65;color:var(--ink-2)}
+  .openbtn.sm{padding:11px;font-size:13.5px;border-radius:11px}
+  .c-meta{font-size:12px}
+  .ghlink{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+  .synced{display:block;margin-top:3px;font-size:11.5px;color:var(--ink-3)}
+  .synced::before{content:"✓ ";color:#4f9b6a}
+  .kvrow.work .v b,.kvrow.hold .v b{color:var(--hot)}
+  .pathrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .pathbox{flex:1;min-width:160px;font-family:"IBM Plex Mono",monospace;font-size:11.5px;
+    background:var(--ghost);border-radius:8px;padding:8px 11px;overflow-x:auto;white-space:nowrap}
+  .copy{flex:none;cursor:pointer;border:0;border-radius:999px;padding:7px 15px;
+    font-size:12.5px;font-weight:700;background:var(--ink);color:var(--panel)}
+  .copy.done{background:var(--deep);color:var(--tone)}
+
+  .nogl .pins{display:none}
+  .nogl-msg{display:none}
+  .nogl .nogl-msg{display:block;position:fixed;z-index:25;left:50%;top:50%;
+    transform:translate(-50%,-50%);max-width:320px;text-align:center;padding:22px 24px;
+    border-radius:20px;background:var(--glass-2);border:1px solid var(--edge);
+    font-size:14px;line-height:1.8;color:var(--ink-2)}
+
+  @media (max-width:640px){
+    .hud{left:16px;max-width:calc(100vw - 140px)}
+    .hud p{font-size:12.5px}
+    .tools{right:12px;gap:6px}
+    .tool{width:38px;height:38px}
+    .pin{font-size:11px;padding:3px;gap:0}
+    .pin i{width:13px;height:13px;border-width:2.5px}
+    .pin span{display:none}
+    .pin.hot{padding:3px 9px 3px 3px}
+    .pin.hot span{display:inline;margin-left:5px}
+    .sheet{top:auto;left:10px;right:10px;width:auto;max-height:60vh;
+      bottom:calc(10px + env(safe-area-inset-bottom,0px));
+      transform:translateY(calc(100% + 40px))}
+    body.sheet-open .dock{opacity:0;pointer-events:none;transform:translateY(20px)}
+    body.sheet-open .hud{opacity:0}
+    .hud{transition:opacity .25s}
+    .orb{width:110px;height:110px;right:8%;top:14%}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .stars{animation:none}
+    .sheet,.sheet.on,.dock,.tool,.pin{transition:none}
+  }
+</style>
+</head>
+<body>
+<div class="sky" aria-hidden="true"></div>
+<div class="stars" aria-hidden="true"></div>
+<div class="orb" aria-hidden="true"></div>
+
+<canvas id="stage" aria-label="10棟の建物が並ぶ浮き島。建物を押すと中身が開く" role="img"></canvas>
+
+<div class="pins" id="pins"></div>
+
+<header class="hud">
+  <div class="eyebrow">WORKSHOP ISLAND</div>
+  <h1>作業島</h1>
+  <p>作ってきた10点が、それぞれ建物になった島。ドラッグで回せる。建物を押すと中身が開く。</p>
+  <div class="tally">
+    <span>建物<b id="tAll">10</b></span>
+    <span>GitHub<b id="tGh">0</b></span>
+    <span>公開中<b id="tLive">0</b></span>
+    <span class="hot">要手当<b id="tWork">0</b></span>
+  </div>
+</header>
+
+<div class="tools">
+  <button class="tool" id="rotL" type="button" aria-label="左に回す">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+  </button>
+  <button class="tool" id="rotR" type="button" aria-label="右に回す">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
+  </button>
+  <button class="tool" id="home" type="button" aria-label="島全体を見る">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+  </button>
+  <button class="tool" id="mode" type="button" aria-label="夜にする"></button>
+</div>
+
+<nav class="dock" aria-label="建物の一覧"><div class="dock-in" id="dock"></div></nav>
+
+<aside class="sheet" id="sheet" aria-labelledby="sTitle" role="dialog"></aside>
+
+<div class="nogl-msg">この端末では3D表示が使えないので、下の一覧から開いてね。</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ================================================================
+   作品データ
+   ================================================================ */
+const ART = {
+  kakeibo:`<rect x="14" y="40" width="12" height="24" rx="3" fill="currentColor" opacity=".45"/><rect x="31" y="24" width="12" height="40" rx="3" fill="currentColor"/><rect x="48" y="46" width="12" height="18" rx="3" fill="currentColor" opacity=".68"/><path d="M14 16l14 10 12-8 18 12" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity=".4"/>`,
+  recipe:`<rect x="17" y="13" width="40" height="50" rx="5" fill="none" stroke="currentColor" stroke-width="3"/><path d="M33 13h11v26l-5.5-6-5.5 6z" fill="currentColor"/><g stroke="currentColor" stroke-width="2.4" stroke-linecap="round" opacity=".42"><path d="M24 24h6"/><path d="M24 33h6"/><path d="M24 42h13"/><path d="M24 51h18"/></g>`,
+  tabi:`<path d="M12 56c9-2 11-17 21-17s11 11 21 8" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 8" opacity=".5"/><path d="M44 10c6.6 0 12 5.4 12 12 0 8.6-12 20-12 20s-12-11.4-12-20c0-6.6 5.4-12 12-12z" fill="currentColor"/><circle cx="44" cy="22" r="4.4" fill="var(--tone)"/><circle cx="14" cy="54" r="3.4" fill="currentColor" opacity=".6"/>`,
+  shindan:`<circle cx="15" cy="39" r="5.5" fill="currentColor" opacity=".85"/><path d="M21 39h11M36 39l14-15M36 39l14 15" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" opacity=".38"/><circle cx="56" cy="24" r="4.6" fill="currentColor" opacity=".32"/><circle cx="56" cy="54" r="4.6" fill="currentColor"/>`,
+  aiguide:`<rect x="10" y="16" width="36" height="24" rx="9" fill="currentColor" opacity=".85"/><path d="M19 40v8l9-8z" fill="currentColor" opacity=".85"/><rect x="38" y="40" width="28" height="19" rx="8" fill="currentColor" opacity=".34"/><circle cx="22" cy="28" r="2.8" fill="var(--tone)"/><circle cx="31" cy="28" r="2.8" fill="var(--tone)"/>`,
+  mihon:`<g fill="currentColor"><rect x="13" y="14" width="9" height="40" rx="4.5" opacity=".9"/><rect x="26" y="14" width="9" height="40" rx="4.5" opacity=".68"/><rect x="39" y="14" width="9" height="40" rx="4.5" opacity=".46"/><rect x="52" y="14" width="9" height="40" rx="4.5" opacity=".28"/></g>`,
+  pokkeru:`<circle cx="36" cy="28" r="13" fill="currentColor" opacity=".85"/><path d="M15 62c2.6-11 10-15.5 21-15.5S54.4 51 57 62z" fill="currentColor" opacity=".38"/><g fill="currentColor"><circle cx="58" cy="14" r="4.6"/><circle cx="64.4" cy="20.4" r="4.6" opacity=".66"/><circle cx="58" cy="26.8" r="4.6" opacity=".42"/><circle cx="51.6" cy="20.4" r="4.6" opacity=".66"/></g>`,
+  miyabi:`<g stroke="currentColor" stroke-width="3" fill="none"><rect x="11" y="20" width="30" height="25" rx="4" opacity=".4"/><rect x="27" y="20" width="30" height="25" rx="4" opacity=".4"/><rect x="19" y="26" width="30" height="25" rx="4" fill="var(--tone)"/></g><circle cx="28" cy="34" r="3.8" fill="currentColor"/><path d="M21 49l9-9 7 6 5-4.5 6 7.5z" fill="currentColor" opacity=".5"/>`,
+  arcana:`<g fill="currentColor"><rect x="19" y="14" width="27" height="40" rx="4" opacity=".34" transform="rotate(-14 32 56)"/><rect x="26" y="14" width="27" height="40" rx="4" opacity=".34" transform="rotate(14 40 56)"/><rect x="22.5" y="12" width="27" height="40" rx="4"/></g><path d="M36 21l2.9 6.1 6.6.9-4.8 4.7 1.1 6.7L36 37l-5.8 3.4 1.1-6.7-4.8-4.7 6.6-.9z" fill="var(--tone)"/>`,
+  teiki:`<circle cx="39" cy="39" r="21" fill="none" stroke="currentColor" stroke-width="2.6" stroke-dasharray="3 8" opacity=".42"/><circle cx="39" cy="39" r="9" fill="currentColor" opacity=".8"/><circle cx="39" cy="18" r="5.4" fill="currentColor"/>`
+};
+
+const ITEMS = [
+  { key:"kakeibo", bld:"bank", x:-3.8, z:0.9, rot:0, place:"BANK · 銀行",
+    tint:"#c9dcc4", dp:"#3f6244", tintD:"#2a3c2d", dpD:"#a9ccab",
+    name:"家計簿", short:"家計簿", date:"2026-06", size:"82 KB",
+    sub:"予算・カテゴリ別・6か月の推移をグラフで見る",
+    full:"収支を記録すると、今月の予算消化・カテゴリ別の支出・直近6か月の推移がグラフになる。固定費の登録とカテゴリ管理つき。",
+    path:"~/Documents/Claude/家計簿データ/kakeibo-app.html",
+    url:"https://damegane06-stack.github.io/kakeibo/kakeibo-app.html", repo:"https://github.com/damegane06-stack/kakeibo",
+    status:"ready", statusNote:"GitHub Pagesで公開中",
+    limits:["レシート撮影とAIアドバイスは、中継（プロキシ）のURLを設定したときだけ動く"] },
+
+  { key:"recipe", bld:"diner", x:-1.3, z:3.0, rot:0, place:"DINER · 食堂",
+    tint:"#f0d7bb", dp:"#8a5629", tintD:"#3d2d1c", dpD:"#e0ab73",
+    name:"レシピの栞", short:"レシピの栞", date:"2026-07", size:"78 KB",
+    sub:"料理のリンクをためておく帖。作った記録つき",
+    full:"料理のリンクをためておく帖。ジャンルを自分で管理できて、買い物リスト・ランダム献立・作った記録まで入っている。",
+    path:"~/Documents/Claude/レシピの栞/index.html",
+    url:"https://damegane06-stack.github.io/recipe-shiori/", repo:"https://github.com/damegane06-stack/recipe-shiori",
+    status:"ready", statusNote:"GitHub Pagesで公開中。クラウド同期も書き出しも効く" },
+
+  { key:"tabi", bld:"station", x:1.9, z:4.9, rot:0, place:"STATION · 駅",
+    tint:"#c6dae9", dp:"#2f5f82", tintD:"#1c3040", dpD:"#8bbcdd",
+    name:"タビメモ", short:"タビメモ", date:"2026-09", size:"457 KB",
+    sub:"行きたいところを保存して、日本地図で塗りつぶす",
+    full:"インスタで見つけた行きたいところを保存して、都道府県ごとに日本地図を塗っていく。駅名から近い順に並べたり、貼り付けた文章から地名を自動で拾ったりできる。",
+    path:"~/Documents/Claude/インスタメモ/tabimemo-pwa 13/",
+    url:"https://damegane06-stack.github.io/tabimemo/", repo:"https://github.com/damegane06-stack/tabimemo",
+    status:"ready", statusNote:"GitHub Pagesで公開中。ホーム画面に置くアプリとしても使える",
+    limits:["ホットペッパー連携は、中継URLを設定したときだけ動く"] },
+
+  { key:"plan", bld:"tower", x:4.7, z:-2.3, rot:Math.PI/2, place:"TOWER · 電波塔",
+    tint:"#d5cee8", dp:"#564689", tintD:"#2c2740", dpD:"#b4a5e0",
+    name:"スマホプラン診断", short:"プラン診断", date:"2026-06", size:"30 KB",
+    sub:"6つの質問に答えると、合うキャリアとプランが出る",
+    full:"データ量・予算・家族割・通話・住んでる場所・サポートの6問に答えると、合うキャリアとプランを1位・2位で出す診断。",
+    path:"~/Documents/Claude/スマホプラン診断/index.html",
+    url:"https://claude.ai/artifact/BmXjqcr8peHPLyTMXWWeHP",
+    status:"ready", statusNote:"claude.aiで公開中（GitHubにはまだ上げていない）",
+    limits:["「AI相談」タブは外部への通信が塞がれていて動かない。6問の診断の方は完全に動く"] },
+
+  { key:"aiguide", bld:"lighthouse", x:-4.9, z:4.7, rot:0, place:"LIGHTHOUSE · 灯台",
+    tint:"#efe2b4", dp:"#7d6420", tintD:"#3a321a", dpD:"#d9c069",
+    name:"AIって、こんなことができます", short:"AIの案内", date:"2026-07", size:"15 KB",
+    sub:"AIを触ったことがない人に見せるための案内",
+    full:"AIを使ったことがない人（主にシニア向け）に、暮らし・健康・書類・手紙などの場面ごとの会話例を見せる案内。",
+    path:"~/Claude/Artifacts/ai-tsukaikata-guide/index.html",
+    url:"https://claude.ai/artifact/PMK4cHRSXNBX8AYrtfWeWN",
+    status:"ready", statusNote:"claude.aiで公開中（GitHubにはまだ上げていない）",
+    lines:["やり方は、たった3つ","こんな場面で使えます","まずは、この一言から","むずかしそう、は思いこみです"] },
+
+  { key:"mihon", bld:"boutique", x:3.8, z:1.5, rot:Math.PI/2, place:"BOUTIQUE · 見本の店",
+    tint:"#f2cdd6", dp:"#98415c", tintD:"#3e222b", dpD:"#e094ac",
+    name:"デザイン見本帳", short:"見本帳", date:"2026-07", size:"12 KB ＋ デモ4本",
+    sub:"サイト制作を受けるための営業用見本。4案入り",
+    full:"配信者さんのプロフィールサイト制作を受けるための営業用見本。カードを押すと4つのデモが実際に開く。",
+    path:"~/Documents/Claude/BOOTH販売用/index.html",
+    url:"https://damegane06-stack.github.io/mihon/", repo:"https://github.com/damegane06-stack/mihon",
+    status:"ready", statusNote:"GitHub Pagesで公開中。BOOTHの商品ページにこのURLを貼れる",
+    lines:["夜のバー — BAR LILAS","雪と静寂 — 雪浦とわ","硬質クール — REIJI","ポップかわいい — 星野ぽむ"],
+    limits:["「BOOTHで詳細を見る」のリンク先と、下の © の屋号がまだ空欄のまま"] },
+
+  { key:"profile", bld:"studio", x:2.0, z:-4.2, rot:0, place:"STUDIO · 放送スタジオ",
+    tint:"#d9e4bb", dp:"#5d7229", tintD:"#2e3a1c", dpD:"#b3ce74",
+    name:"配信者プロフィール", short:"プロフィール", date:"2026-06",
+    sub:"配信者さんのプロフィールページ。2つから選んで開く",
+    full:"Spoonで配信している人のためのプロフィールページ。スタジオの中に2つある。",
+    path:"~/Documents/Claude/ぽけ/index.html",
+    status:"ready", statusNote:"2つともGitHub Pagesで公開中",
+    choices:[
+      {label:"プロフィール1", sub:"花びらのローダーから始まる1枚もの。季節の演出・BGM・おうたのリスト・すきなアーティスト一覧つき",
+       url:"https://damegane06-stack.github.io/pokkeru/", repo:"https://github.com/damegane06-stack/pokkeru", sync:"GitHubの方が新しい版（Macに残っている版とは中身が違う）"},
+      {label:"プロフィール2", sub:"雑談・企画・バー企画の配信紹介と、匿名メッセージ・企画案の受付つき",
+       url:"https://damegane06-stack.github.io/dameko_mama/", repo:"https://github.com/damegane06-stack/dameko_mama", sync:"GitHubにだけある（Macには置いていない）"}
+    ] },
+
+  { key:"miyabi", bld:"photo", x:-0.9, z:-4.6, rot:0, place:"PHOTO · 写真館",
+    tint:"#bfdcd3", dp:"#2c6355", tintD:"#1b332d", dpD:"#83c4b1",
+    name:"雅〜みやび〜", short:"雅", date:"2026-07", size:"12.8 MB",
+    sub:"動物写真家のサイト。写真9枚のギャラリーつき",
+    full:"こっしーさんの動物写真家サイト。ハシビロコウ・マヌルネコ・ヒョウなど9枚のギャラリー、経歴、SNSへの導線まで入っている。",
+    path:"~/Documents/こっしーサイト/",
+    url:"https://damegane06-stack.github.io/miyabi-profile/", repo:"https://github.com/damegane06-stack/miyabi-profile",
+    status:"ready", statusNote:"GitHub Pagesで公開中" },
+
+  { key:"arcana", bld:"castle", x:-4.2, z:-2.6, rot:0, place:"CASTLE · お城",
+    tint:"#ecd9ac", dp:"#7e6021", tintD:"#3a3019", dpD:"#d6b76c",
+    name:"アルカナクラッシュ", short:"アルカナ", date:"2026-06", size:"35 KB ＋ 画像79 MB",
+    sub:"絵札まで自分で用意したカードバトル。15種",
+    full:"自分で絵札まで用意したオリジナルのカードバトル。アテナ・スサノオ・ガロ・ルカなど15種。遊び方も中に書いてある。",
+    path:"~/Documents/Claude/カードゲーム/index.html",
+    url:"https://damegane06-stack.github.io/arcana-clash/", repo:"https://github.com/damegane06-stack/arcana-clash",
+    status:"work", statusNote:"遊べる。ただし直したいところが2つ", broken:true,
+    note:"GitHub版はカードの絵がちゃんと出る。直したいのはこの2つ。",
+    lines:["fireball.png の中身が雷撃、thunder.png の中身がファイアボール。名前が入れ替わっている","背景の bg.jpg とリーダーの2枚（leader_player／leader_enemy）がまだ無い"] },
+
+  { key:"teiki", bld:"clock", x:0.6, z:-0.6, rot:Math.PI/4, place:"CLOCK TOWER · 時計塔",
+    tint:"#cfd6e0", dp:"#495568", tintD:"#262c36", dpD:"#a6b5c9",
+    name:"定期実行タスク 6本", short:"定期便", date:"稼働中",
+    sub:"何もしなくても、決まった時間に勝手に走っている",
+    full:"こちらが何もしなくても、決まった時間に勝手に走っている6本の定期タスク。",
+    path:"~/Claude/Scheduled/",
+    status:"na",
+    lines:["buzz 朝／昼／夕／夜 — X・Instagram・TikTokのバズを集めて投稿案まで作る","daily-ai-news-summary — AIニュースを毎朝やさしく要約","weekly-gmail-priority-summary — Gmailを重要度別にまとめて通知"] }
+];
+const ARTKEY = {kakeibo:"kakeibo",recipe:"recipe",tabi:"tabi",plan:"shindan",aiguide:"aiguide",
+  mihon:"mihon",profile:"pokkeru",miyabi:"miyabi",arcana:"arcana",teiki:"teiki"};
+const STATUS = {ready:"公開済み",work:"作業がいる",hold:"保留中",na:"—"};
+const byKey = {}; ITEMS.forEach(i => byKey[i.key] = i);
+
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+// GitHub Pages 版では Mac の中の場所は出さない
+const SHOW_PATHS = !/github\.io$/.test(location.hostname);
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const $ = id => document.getElementById(id);
+
+$("tLive").textContent = ITEMS.filter(i=>i.url).length;
+$("tGh").textContent = ITEMS.reduce((n,i)=>n+(i.repo?1:0)+(i.choices?i.choices.filter(c=>c.repo).length:0),0);
+$("tLive").textContent = ITEMS.reduce((n,i)=>n+(i.url?1:0)+(i.choices?i.choices.length:0),0);
+$("tWork").textContent = ITEMS.filter(i=>i.broken).length;
+
+/* ================================================================
+   昼と夜
+   ================================================================ */
+let override = null;
+function hostDark(){
+  const t = document.documentElement.getAttribute("data-theme");
+  if (t === "dark") return true;
+  if (t === "light") return false;
+  return matchMedia("(prefers-color-scheme: dark)").matches;
+}
+const isNight = () => override ? override === "night" : hostDark();
+let night = isNight();
+let nightGoal = night ? 1 : 0, nightK = nightGoal;
+
+const SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg>';
+const MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.6A8.3 8.3 0 0 1 9.4 4a8.3 8.3 0 1 0 10.6 10.6z"/></svg>';
+
+function toneOf(it){ return night ? {t:it.tintD,d:it.dpD} : {t:it.tint,d:it.dp}; }
+function paintTones(){
+  document.querySelectorAll("[data-key]").forEach(el=>{
+    const c = toneOf(byKey[el.dataset.key]);
+    el.style.setProperty("--tone",c.t); el.style.setProperty("--deep",c.d);
+  });
+}
+function syncMode(){
+  night = isNight();
+  document.body.classList.toggle("is-night",night);
+  document.body.classList.toggle("is-day",!night);
+  nightGoal = night ? 1 : 0;
+  if (RM) nightK = nightGoal;
+  $("mode").innerHTML = night ? SUN : MOON;
+  $("mode").setAttribute("aria-label", night ? "昼にする" : "夜にする");
+  paintTones();
+}
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{ if(!override) syncMode(); });
+new MutationObserver(()=>{ if(!override) syncMode(); })
+  .observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+$("mode").addEventListener("click",()=>{ override = night ? "day" : "night"; syncMode(); });
+
+/* ================================================================
+   名札・一覧・開いたところ
+   ================================================================ */
+const pinsEl = $("pins"), dockEl = $("dock"), sheet = $("sheet");
+const pinEls = {}, chipEls = {};
+let hoverKey = null, focusKey = null, lastTrigger = null;
+
+ITEMS.forEach(it=>{
+  const p = document.createElement("button");
+  p.type = "button"; p.className = "pin" + (it.broken ? " flag" : ""); p.dataset.key = it.key;
+  p.innerHTML = "<i></i><span>" + esc(it.short) + "</span>";
+  p.setAttribute("aria-label", it.name + "を開く");
+  p.addEventListener("click", ()=>openItem(it.key,p));
+  p.addEventListener("mouseenter", ()=>{ hoverKey = it.key; });
+  p.addEventListener("mouseleave", ()=>{ if(hoverKey===it.key) hoverKey = null; });
+  pinsEl.appendChild(p); pinEls[it.key] = p;
+
+  const c = document.createElement("button");
+  c.type = "button"; c.className = "chip"; c.dataset.key = it.key;
+  c.innerHTML = "<i></i>" + esc(it.short);
+  c.addEventListener("click", ()=>openItem(it.key,c));
+  c.addEventListener("mouseenter", ()=>{ hoverKey = it.key; });
+  c.addEventListener("mouseleave", ()=>{ if(hoverKey===it.key) hoverKey = null; });
+  c.addEventListener("focus", ()=>{ hoverKey = it.key; });
+  c.addEventListener("blur", ()=>{ if(hoverKey===it.key) hoverKey = null; });
+  dockEl.appendChild(c); chipEls[it.key] = c;
+});
+
+async function copyText(t){
+  try{ await navigator.clipboard.writeText(t); return true; }
+  catch(e){
+    try{ const ta=document.createElement("textarea"); ta.value=t; ta.style.position="fixed"; ta.style.opacity="0";
+      document.body.appendChild(ta); ta.select(); const ok=document.execCommand("copy");
+      document.body.removeChild(ta); return ok; }catch(e2){ return false; }
+  }
+}
+
+function openItem(key, trigger){
+  const it = byKey[key]; if(!it) return;
+  lastTrigger = trigger || null;
+  focusKey = key;
+  const facts = [it.date]; if(it.size) facts.push(it.size);
+  let b = '<p class="full">'+esc(it.full)+'</p>';
+  if(it.note) b += '<div class="callout'+(it.broken?' hot':'')+'">'+esc(it.note)+'</div>';
+  if(it.lines) b += '<ul class="lines">'+it.lines.map(l=>'<li>'+esc(l)+'</li>').join('')+'</ul>';
+  if(it.url) b += '<a class="openbtn" href="'+it.url+'" target="_blank" rel="noopener">ひらく <span aria-hidden="true">→</span></a>';
+  if(it.choices) b += '<div class="choices">'+it.choices.map(c=>
+    '<div class="choice"><div class="c-name">'+esc(c.label)+'</div><p class="c-sub">'+esc(c.sub)+'</p>'+
+    '<a class="openbtn sm" href="'+c.url+'" target="_blank" rel="noopener">'+esc(c.label)+'をひらく <span aria-hidden="true">→</span></a>'+
+    '<div class="c-meta"><a class="ghlink" href="'+c.repo+'" target="_blank" rel="noopener">GitHubで見る</a>'+
+    '<span class="synced">'+esc(c.sync)+'</span></div></div>').join('')+'</div>';
+  if(it.limits) b += '<div class="limits"><div class="limits-h">公開版で効かないところ</div><ul>'+
+    it.limits.map(l=>'<li>'+esc(l)+'</li>').join('')+'</ul></div>';
+  b += '<div class="kv">';
+  b += '<div class="kvrow"><span class="k">FILE</span><span class="v">'+esc(facts.join(" / "))+'</span></div>';
+  if(it.status!=="na") b += '<div class="kvrow '+it.status+'"><span class="k">STATUS</span><span class="v"><b>'+
+    esc(STATUS[it.status])+'</b>'+(it.statusNote?' — '+esc(it.statusNote):'')+'</span></div>';
+  if(it.repo) b += '<div class="kvrow"><span class="k">GITHUB</span><span class="v"><a class="ghlink" href="'+it.repo+'" target="_blank" rel="noopener">'+esc(it.repo.replace("https://github.com/",""))+'</a><span class="synced">Macの版と同じ（9/23確認）</span></span></div>';
+  if(SHOW_PATHS) b += '<div class="kvrow"><span class="k">WHERE</span><span class="v"><span class="pathrow"><span class="pathbox">'+
+    esc(it.path)+'</span><button type="button" class="copy">場所をコピー</button></span></span></div>';
+  b += '</div>';
+
+  sheet.dataset.key = key;
+  sheet.innerHTML =
+    '<div class="s-top"><span class="blob"></span>'+
+      '<button class="x" type="button" aria-label="閉じる">×</button>'+
+      '<div class="s-art"><svg viewBox="0 0 78 78" aria-hidden="true">'+ART[ARTKEY[key]]+'</svg></div>'+
+      '<div class="s-place">'+esc(it.place)+'</div>'+
+      '<h2 id="sTitle">'+esc(it.name)+'</h2>'+
+      '<p class="sub">'+esc(it.sub)+'</p>'+
+    '</div><div class="s-body">'+b+'</div>';
+  paintTones();
+  sheet.classList.add("on");
+  document.body.classList.add("sheet-open");
+  sheet.scrollTop = 0;
+  sheet.querySelector(".x").addEventListener("click", closeItem);
+  const cp = sheet.querySelector(".copy");
+  if(cp) cp.addEventListener("click", async()=>{
+    const ok = await copyText(it.path);
+    cp.textContent = ok ? "コピーした" : "コピーできず"; cp.classList.toggle("done",ok);
+    setTimeout(()=>{ cp.textContent="場所をコピー"; cp.classList.remove("done"); },1700);
+  });
+  setTimeout(()=>{ try{ sheet.querySelector(".x").focus({preventScroll:true}); }catch(e){} }, 60);
+}
+function closeItem(){
+  if(!focusKey) return;
+  focusKey = null;
+  sheet.classList.remove("on");
+  document.body.classList.remove("sheet-open");
+  if(lastTrigger) try{ lastTrigger.focus({preventScroll:true}); }catch(e){}
+}
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape") closeItem();
+});
+
+syncMode();
+
+/* ================================================================
+   3D の島
+   ================================================================ */
+function hasGL(){
+  try{ const c=document.createElement("canvas");
+    return !!(window.WebGLRenderingContext && (c.getContext("webgl")||c.getContext("experimental-webgl"))); }
+  catch(e){ return false; }
+}
+if(!window.THREE || !hasGL()){ document.body.classList.add("nogl"); return; }
+
+const T = THREE;
+const canvas = $("stage");
+const renderer = new T.WebGLRenderer({canvas, antialias:true, alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+renderer.setClearColor(0x000000, 0);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = T.PCFSoftShadowMap;
+
+const scene = new T.Scene();
+const camera = new T.OrthographicCamera(-10,10,10,-10,0.1,200);
+const VIEW = new T.Vector3(1,0.8,1).normalize();
+const target = new T.Vector3(0,0.2,0);
+camera.position.copy(target).addScaledVector(VIEW,60);
+camera.lookAt(target);
+const RIGHT = new T.Vector3(1,0,0).applyQuaternion(camera.quaternion);
+const UPV = new T.Vector3(0,1,0).applyQuaternion(camera.quaternion);
+
+/* 光 */
+const hemi = new T.HemisphereLight(0xe8f3ff,0xcbb99b,.58); scene.add(hemi);
+const amb = new T.AmbientLight(0xffffff,.1); scene.add(amb);
+const sun = new T.DirectionalLight(0xfff1dc,.92);
+sun.position.set(9,16,6); sun.castShadow = true;
+sun.shadow.mapSize.set(2048,2048);
+Object.assign(sun.shadow.camera,{left:-13,right:13,top:13,bottom:-13,near:1,far:60});
+sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.025;
+scene.add(sun); scene.add(sun.target);
+
+const world = new T.Group(); scene.add(world);
+const floaters = [];
+
+/* 素材 */
+const mats = {};
+function M(hex, opts){
+  const k = hex + (opts ? JSON.stringify(opts) : "");
+  if(!mats[k]) mats[k] = new T.MeshStandardMaterial(Object.assign({color:hex,flatShading:true,roughness:.92,metalness:0},opts||{}));
+  return mats[k];
+}
+const hx = s => parseInt(s.slice(1),16);
+function mesh(g,m,x,y,z){ const o=new T.Mesh(g,m); o.position.set(x||0,y||0,z||0); o.castShadow=true; o.receiveShadow=true; return o; }
+const B = (w,h,d) => new T.BoxGeometry(w,h,d);
+const C = (rt,rb,h,s) => new T.CylinderGeometry(rt,rb,h,s||8);
+const K = (r,h,s) => new T.ConeGeometry(r,h,s||8);
+const ICO = (r,d) => new T.IcosahedronGeometry(r,d||0);
+function prism(w,h,d){
+  const s=new T.Shape(); s.moveTo(-d/2,0); s.lineTo(d/2,0); s.lineTo(0,h); s.lineTo(-d/2,0);
+  const g=new T.ExtrudeGeometry(s,{depth:w,bevelEnabled:false}); g.translate(0,0,-w/2); g.rotateY(Math.PI/2); return g;
+}
+const winMat = new T.MeshStandardMaterial({color:0xcfe2ef,emissive:0xffc766,emissiveIntensity:0,flatShading:true,roughness:.35});
+const lampMat = new T.MeshStandardMaterial({color:0xf5efe0,emissive:0xffc774,emissiveIntensity:0,flatShading:true});
+const glowMats = [];   // 夜に光らせる素材 [material, 昼, 夜]
+function glow(mat,day,nightV){ glowMats.push([mat,day,nightV]); return mat; }
+function win(w,h,x,y,z,side){ const o=new T.Mesh(side?B(.05,h,w):B(w,h,.05),winMat); o.position.set(x,y,z); return o; }
+function door(w,h,x,y,z,col){ return mesh(B(w,h,.05),M(col||0x7a5a3e),x,y,z); }
+function sign(text,w,h,bg,fg){
+  const cv=document.createElement("canvas"); cv.width=256; cv.height=Math.round(256*h/w);
+  const x=cv.getContext("2d"); x.fillStyle=bg; x.fillRect(0,0,cv.width,cv.height);
+  x.fillStyle=fg; x.textAlign="center"; x.textBaseline="middle";
+  x.font="700 "+Math.round(cv.height*.58)+"px 'Hiragino Kaku Gothic ProN','Hiragino Sans','Noto Sans JP',sans-serif";
+  x.fillText(text,cv.width/2,cv.height/2+cv.height*.03);
+  const tex=new T.CanvasTexture(cv); tex.anisotropy=4;
+  return new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({map:tex}));
+}
+function noPick(o){ o.raycast=()=>{}; return o; }
+
+/* ---------------- 島の地面 ---------------- */
+function rrPath(p,hw,hh,r){
+  p.moveTo(-hw+r,-hh); p.lineTo(hw-r,-hh); p.absarc(hw-r,-hh+r,r,-Math.PI/2,0,false);
+  p.lineTo(hw,hh-r); p.absarc(hw-r,hh-r,r,0,Math.PI/2,false);
+  p.lineTo(-hw+r,hh); p.absarc(-hw+r,hh-r,r,Math.PI/2,Math.PI,false);
+  p.lineTo(-hw,-hh+r); p.absarc(-hw+r,-hh+r,r,Math.PI,Math.PI*1.5,false);
+  return p;
+}
+const rr = (h,r) => rrPath(new T.Shape(),h,h,r);
+function ringShape(o,i,ro,ri){ const s=rr(o,ro); s.holes.push(rrPath(new T.Path(),i,i,ri)); return s; }
+function slab(shape,depth,mat,y,bevel){
+  const g=new T.ExtrudeGeometry(shape,{depth,bevelEnabled:!!bevel,bevelSize:bevel||0,bevelThickness:bevel||0,bevelSegments:2,curveSegments:12});
+  g.rotateX(-Math.PI/2); const m=new T.Mesh(g,mat); m.position.y=y; m.receiveShadow=true; return m;
+}
+const HALF = 8, CORNER = 2.4;
+world.add(slab(rr(HALF,CORNER),.34,M(0x98ca7c),-.46,.12));
+const soil = slab(rr(HALF-.05,CORNER-.05),1.4,M(0xc6986e),-1.86); soil.castShadow = true; world.add(soil);
+world.add(slab(rr(HALF-.15,CORNER-.1),.9,M(0xaa7e58),-2.76));
+{
+  const g = new T.CylinderGeometry(7.3,.4,9.5,11,6);
+  const pos = g.attributes.position, rnd = mulberry(11);
+  for(let i=0;i<pos.count;i++){
+    const y=pos.getY(i);
+    if(y < 4.7){ const j=.35+(4.75-y)*.06; pos.setX(i,pos.getX(i)+(rnd()-.5)*j*2); pos.setZ(i,pos.getZ(i)+(rnd()-.5)*j*2); pos.setY(i,y+(rnd()-.5)*.5); }
+  }
+  g.computeVertexNormals();
+  const rock = new T.Mesh(g,M(0x8f7762)); rock.position.y = -2.76-4.75; world.add(rock);
+  // 島の下に浮いている小さな岩
+  [[8.6,-6.4,1.2,.75],[-7.4,-7.8,6.2,.6],[3.2,-9.6,8.4,.5],[-8.8,-5.2,-2.4,.45]].forEach((f,i)=>{
+    const m=mesh(new T.DodecahedronGeometry(f[3],0),M(i%2?0x9c836b:0x8a725d),f[0],f[1],f[2]);
+    m.userData.float={y:f[1],ph:i*1.7}; m.castShadow=false; world.add(m); floaters.push(m);
+    if(i<2){ const cap=mesh(new T.DodecahedronGeometry(f[3]*.8,0),M(0x98ca7c),f[0],f[1]+f[3]*.55,f[2]); cap.scale.y=.35; cap.userData.float={y:f[1]+f[3]*.55,ph:i*1.7}; world.add(cap); floaters.push(cap); }
+  });
+}
+function mulberry(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+
+/* ---------------- 線路 ---------------- */
+const TR = 6.6, TRR = 2.2, TA = TR - TRR;
+world.add(slab(ringShape(TR+.4,TR-.4,TRR+.4,TRR-.4),.05,M(0xd6cab1),0));
+world.add(slab(ringShape(TR+.22,TR+.15,TRR+.22,TRR+.15),.045,M(0x8a8e99,{metalness:.45,roughness:.45}),.06));
+world.add(slab(ringShape(TR-.15,TR-.22,TRR-.15,TRR-.22),.045,M(0x8a8e99,{metalness:.45,roughness:.45}),.06));
+const SEG = [
+  {t:"l",x:-TA,z:TR,dx:1,dz:0},{t:"a",cx:TA,cz:TA,a0:Math.PI/2},
+  {t:"l",x:TR,z:TA,dx:0,dz:-1},{t:"a",cx:TA,cz:-TA,a0:0},
+  {t:"l",x:TA,z:-TR,dx:-1,dz:0},{t:"a",cx:-TA,cz:-TA,a0:-Math.PI/2},
+  {t:"l",x:-TR,z:-TA,dx:0,dz:1},{t:"a",cx:-TA,cz:TA,a0:-Math.PI}
+];
+SEG.forEach(s=>s.len = s.t==="l" ? 2*TA : Math.PI*TRR/2);
+const TL = SEG.reduce((p,s)=>p+s.len,0);
+function trackAt(s){
+  s = ((s%TL)+TL)%TL;
+  for(const g of SEG){
+    if(s <= g.len){
+      if(g.t==="l") return {x:g.x+g.dx*s, z:g.z+g.dz*s, rot:Math.atan2(-g.dz,g.dx)};
+      const a = g.a0 - s/TRR, dx = Math.sin(a), dz = -Math.cos(a);
+      return {x:g.cx+TRR*Math.cos(a), z:g.cz+TRR*Math.sin(a), rot:Math.atan2(-dz,dx)};
+    }
+    s -= g.len;
+  }
+  return {x:0,z:0,rot:0};
+}
+{
+  const step=.34, n=Math.floor(TL/step);
+  const ties = new T.InstancedMesh(B(.12,.035,.62),M(0x9c7b5b),n);
+  const d = new T.Object3D();
+  for(let i=0;i<n;i++){ const q=trackAt(i*step); d.position.set(q.x,.06,q.z); d.rotation.set(0,q.rot,0); d.updateMatrix(); ties.setMatrixAt(i,d.matrix); }
+  ties.receiveShadow = true; world.add(ties);
+}
+function trackDist(x,z){
+  const qx=Math.abs(x)-TA, qz=Math.abs(z)-TA;
+  return Math.abs(Math.hypot(Math.max(qx,0),Math.max(qz,0))+Math.min(Math.max(qx,qz),0)-TRR);
+}
+function islandSD(x,z){
+  const a=HALF-CORNER, qx=Math.abs(x)-a, qz=Math.abs(z)-a;
+  return Math.hypot(Math.max(qx,0),Math.max(qz,0))+Math.min(Math.max(qx,qz),0)-CORNER;
+}
+
+/* ---------------- 建物 ---------------- */
+const WALL=0xf7f3ea, STONE=0xe9e3d6;
+
+function bBank(c){
+  const g=new T.Group();
+  g.add(mesh(B(2.4,.2,2.0),M(STONE),0,.1,0));
+  g.add(mesh(B(1.3,.1,.34),M(STONE),0,.05,1.12));
+  g.add(mesh(B(2.0,1.05,1.3),M(WALL),0,.725,-.15));
+  [-.78,-.26,.26,.78].forEach(x=>g.add(mesh(C(.085,.1,1.0,8),M(0xfbf9f3),x,.7,.72)));
+  g.add(mesh(B(2.2,.16,1.75),M(STONE),0,1.28,0));
+  g.add(mesh(prism(2.2,.52,1.75),M(c.deep),0,1.36,0));
+  const s=sign("家 計 簿",1.1,.14,"#f4f0e6",c.deepS); s.position.set(0,1.28,.877); g.add(s);
+  const coinG=new T.Group(); coinG.position.set(0,1.6,.88);
+  const coin=mesh(C(.2,.2,.07,16),M(0xe2b64a,{metalness:.35,roughness:.45})); coin.rotation.x=Math.PI/2; coinG.add(coin); g.add(coinG);
+  g.add(door(.38,.62,0,.51,.505));
+  g.add(win(.36,.4,1.005,.8,-.15,true)); g.add(win(.36,.4,-1.005,.8,-.15,true));
+  return {g,h:1.95,hit:[2.4,2.0],anim:(t,k)=>{ coinG.rotation.y = t*1.4 + k*t*4; }};
+}
+function bDiner(c){
+  const g=new T.Group();
+  g.add(mesh(B(1.9,.12,1.6),M(STONE),0,.06,0));
+  g.add(mesh(B(1.75,1.0,1.35),M(0xfbf2e6),0,.62,-.05));
+  g.add(mesh(prism(1.95,.72,1.62),M(0xd37a45),0,1.12,-.05));
+  g.add(mesh(B(.24,.62,.24),M(0xb4674b),.48,1.45,-.35));
+  const cols=[0xe98a4f,0xfff5ea];
+  for(let i=0;i<6;i++){ const s=mesh(B(.29,.04,.5),M(cols[i%2]),-.725+i*.29,.98,.86); s.rotation.x=.38; g.add(s); }
+  g.add(door(.34,.56,-.4,.4,.63));
+  g.add(win(.56,.34,.33,.62,.63));
+  g.add(mesh(C(.2,.2,.04,10),M(0xffffff),1.28,.42,.78));
+  g.add(mesh(C(.03,.04,.42,6),M(0x777777),1.28,.21,.78));
+  g.add(mesh(C(.02,.02,.72,6),M(0x777777),1.28,.62,.78));
+  g.add(mesh(K(.44,.22,8),M(c.deep),1.28,1.03,.78));
+  const puffs = makePuffs(g,6,new T.Vector3(.48,1.8,-.35),.45,.9);
+  return {g,h:2.1,hit:[2.2,1.8],puffs};
+}
+function bStation(c){
+  const g=new T.Group();
+  g.add(mesh(B(3.0,.26,.72),M(0xdcd8d0),0,.13,.95));
+  g.add(mesh(B(3.0,.02,.07),M(0xf2c94c),0,.27,1.27));
+  g.add(mesh(B(1.7,.9,.95),M(0xf8f4ee),0,.45,-.12));
+  g.add(mesh(B(2.5,.12,1.75),M(c.deep),0,.98,.3));
+  [-1.05,1.05].forEach(x=>g.add(mesh(C(.05,.05,.72,6),M(0x8a8f99),x,.62,1.05)));
+  g.add(door(.42,.58,0,.3,.37,0x3d4f63));
+  g.add(win(.36,.3,-.52,.52,.37)); g.add(win(.36,.3,.52,.52,.37));
+  g.add(mesh(B(1.05,.3,.07),M(0xffffff),0,1.2,.28));
+  const s=sign("タビメモ駅",1.0,.26,"#ffffff",c.deepS); s.position.set(0,1.2,.318); g.add(s);
+  g.add(mesh(B(.6,.06,.2),M(0xa87b52),-.8,.45,.92));
+  g.add(mesh(B(.6,.2,.04),M(0xa87b52),-.8,.55,.83));
+  return {g,h:1.45,hit:[3.0,2.0]};
+}
+function bTower(c){
+  const g=new T.Group();
+  g.add(mesh(B(1.3,.5,1.1),M(0xf2f0f7),0,.25,0));
+  g.add(win(.46,.22,0,.3,.555));
+  const P=M(c.deep), W=M(0xf6f4fb);
+  let y=.5;
+  [[.5,.4,1.0,P],[.4,.31,.9,W],[.31,.22,.8,P],[.22,.14,.7,W]].forEach((s,i)=>{
+    const m=mesh(C(s[1],s[0],s[2],4),s[3],0,y+s[2]/2,0); m.rotation.y=Math.PI/4; g.add(m); y+=s[2];
+    if(i===0) g.add(mesh(B(.82,.08,.82),W,0,y,0));
+  });
+  g.add(mesh(C(.02,.03,.7,6),M(0x9a9aa8),0,y+.35,0));
+  const lampM = new T.MeshStandardMaterial({color:0xff4d4d,emissive:0xff2a2a,emissiveIntensity:1,flatShading:true});
+  const lamp = mesh(ICO(.075),lampM,0,y+.72,0); lamp.castShadow=false; g.add(lamp);
+  const rings=[];
+  for(let i=0;i<3;i++){
+    const rm=new T.MeshBasicMaterial({color:0xb8a6f2,transparent:true,opacity:0,depthWrite:false});
+    const r=noPick(new T.Mesh(new T.TorusGeometry(.3,.022,6,32),rm)); r.rotation.x=Math.PI/2; r.position.y=y+.72; g.add(r); rings.push(r);
+  }
+  return {g,h:y+.85,hit:[1.4,1.4],anim:(t,k)=>{
+    lampM.emissiveIntensity = (Math.sin(t*4)>.55) ? 2 : .25;
+    rings.forEach((r,i)=>{ const p=((t*(.45+k*.6))+i/3)%1; r.scale.setScalar(.6+p*3.6); r.material.opacity=(RM?0:(1-p)*(.55+k*.35)); });
+  }};
+}
+function bLighthouse(c){
+  const g=new T.Group();
+  const rock=mesh(new T.DodecahedronGeometry(.95,0),M(0xb8b2a6),0,.1,0); rock.scale.set(1,.42,1); g.add(rock);
+  [[.85,.05,.55,.28],[-.72,.05,.62,.22],[.25,.05,-.88,.25]].forEach(r=>g.add(mesh(new T.DodecahedronGeometry(r[3],0),M(0xa9a296),r[0],r[1],r[2])));
+  const Y=M(0xe9bd45), Wt=M(0xfbf8f0);
+  let y=.32; const H=[.55,.55,.55,.5], R=[.5,.45,.4,.36,.33];
+  H.forEach((h,i)=>{ g.add(mesh(C(R[i+1],R[i],h,12),i%2?Wt:Y,0,y+h/2,0)); y+=h; });
+  g.add(win(.14,.22,0,1.1,.43)); g.add(win(.14,.22,0,1.95,.37));
+  g.add(mesh(C(.56,.56,.07,12),M(0x5c4d3c),0,y+.035,0)); y+=.07;
+  const rail=new T.Mesh(new T.CylinderGeometry(.52,.52,.16,12,1,true),M(0x5c4d3c,{side:T.DoubleSide}));
+  rail.position.y=y+.08; g.add(rail);
+  const lanM = glow(new T.MeshStandardMaterial({color:0xfff4c2,emissive:0xffd66b,emissiveIntensity:.5,flatShading:true,roughness:.3}),.5,1.8);
+  const lanY = y+.19;
+  g.add(mesh(C(.26,.26,.38,10),lanM,0,lanY,0)); y+=.38;
+  g.add(mesh(K(.36,.34,10),M(0xa4503c),0,y+.17,0)); y+=.34;
+  g.add(mesh(ICO(.05),M(0xa4503c),0,y+.03,0));
+  const beamM = new T.MeshBasicMaterial({color:0xfff1b0,transparent:true,opacity:.1,depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide});
+  const pivot=new T.Group(); pivot.position.y=lanY;
+  [0,Math.PI].forEach(a=>{ const bg=new T.ConeGeometry(.62,4.6,16,1,true); bg.translate(0,-2.3,0); bg.rotateZ(Math.PI/2);
+    const b=noPick(new T.Mesh(bg,beamM)); b.rotation.y=a; pivot.add(b); });
+  g.add(pivot);
+  return {g,h:y+.1,hit:[1.6,1.6],beamM,anim:(t,k)=>{ pivot.rotation.y = RM ? .6 : t*(.7+k*1.4); }};
+}
+function bBoutique(c){
+  const g=new T.Group();
+  g.add(mesh(B(2.0,.1,1.6),M(STONE),0,.05,0));
+  g.add(mesh(B(1.85,1.25,1.3),M(0xfdf8f9),0,.725,-.05));
+  g.add(mesh(B(2.0,.14,1.45),M(c.deep),0,1.42,-.05));
+  const aw=mesh(B(1.95,.05,.4),M(c.deep),0,1.2,.8); aw.rotation.x=.28; g.add(aw);
+  const s=sign("SWATCH BOOK",1.3,.13,"#fdf8f9",c.deepS); s.position.set(0,1.42,.677); g.add(s);
+  const sw=[];
+  [0xff5fa2,0xb8c9de,0x8d97a6,0xffd166].forEach((col,i)=>{
+    const m=mesh(B(.32,.78,.06),glow(new T.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:0,flatShading:true,roughness:.6}),0,.35),-.6+i*.4,.66,.63);
+    g.add(m); sw.push(m);
+  });
+  return {g,h:1.6,hit:[2.0,1.7],anim:(t,k)=>{ sw.forEach((m,i)=>{ m.rotation.y = Math.sin(t*5+i*.9)*.45*k; m.position.y=.66+Math.sin(t*5+i*.9)*.05*k; }); }};
+}
+function bStudio(c){
+  const g=new T.Group();
+  g.add(mesh(B(1.7,.1,1.45),M(STONE),0,.05,0));
+  g.add(mesh(B(1.5,.95,1.2),M(0xf7f6ee),0,.575,-.05));
+  g.add(mesh(prism(1.7,.55,1.42),M(0x8fae55),0,1.05,-.05));
+  const onAir=sign("ON AIR",.58,.2,"#ff4a4a","#ffffff"); onAir.position.set(.12,.86,.556); g.add(onAir);
+  const onM=onAir.material;
+  g.add(door(.32,.55,-.45,.38,.555));
+  g.add(win(.36,.28,.3,.5,.555));
+  g.add(mesh(C(.025,.025,1.25,6),M(0x9a9aa8),.55,1.62,-.35));
+  g.add(mesh(ICO(.08),M(0xdadada),.55,2.27,-.35));
+  return {g,h:2.2,hit:[1.7,1.5],anim:(t,k)=>{ const v=.72+.28*Math.sin(t*(3+k*5)); onM.color.setRGB(v,v,v); }};
+}
+function bPhoto(c){
+  const g=new T.Group();
+  g.add(mesh(B(1.8,.1,1.5),M(STONE),0,.05,0));
+  g.add(mesh(B(1.6,1.05,1.3),M(0xf3f5f2),0,.625,-.05));
+  g.add(mesh(B(1.75,.12,1.45),M(c.deep),0,1.21,-.05));
+  const lens=new T.Group(); lens.position.set(0,.62,.6);
+  const barrel=mesh(C(.4,.44,.3,18),M(0x2b3035,{roughness:.5}),0,0,.15); barrel.rotation.x=Math.PI/2; lens.add(barrel);
+  const ring=mesh(C(.45,.45,.06,18),M(c.deep),0,0,.03); ring.rotation.x=Math.PI/2; lens.add(ring);
+  const gl=mesh(C(.28,.28,.04,18),glow(new T.MeshStandardMaterial({color:0x9fd3e6,emissive:0x5fb0d0,emissiveIntensity:.15,roughness:.15,metalness:.2,flatShading:true}),.15,.6),0,0,.31);
+  gl.rotation.x=Math.PI/2; lens.add(gl); g.add(lens);
+  g.add(mesh(B(.42,.24,.3),M(0x3a3f45),.45,1.39,.1));
+  const flashM=new T.MeshStandardMaterial({color:0xf2f2f2,emissive:0xffffff,emissiveIntensity:0,flatShading:true});
+  g.add(mesh(B(.34,.16,.04),flashM,.45,1.39,.26));
+  const s=sign("PHOTO",.7,.12,"#f3f5f2",c.deepS); s.position.set(-.35,1.21,.678); g.add(s);
+  return {g,h:1.75,hit:[1.8,1.7],anim:(t,k)=>{
+    const p=(t*(k>.5?1.6:.22))%1; flashM.emissiveIntensity = p<.06 ? 3 : 0;
+    lens.scale.z = 1+k*.9; lens.position.z=.6+k*.12;
+  }};
+}
+function bCastle(c){
+  const g=new T.Group();
+  const S=M(0xece2cc), S2=M(0xdcd0b6), R=M(c.deep);
+  g.add(mesh(B(2.3,.8,1.9),S,0,.4,0));
+  for(let i=0;i<7;i++){ const x=-.99+i*.33; g.add(mesh(B(.17,.16,.17),S2,x,.88,.87)); g.add(mesh(B(.17,.16,.17),S2,x,.88,-.87)); }
+  for(let i=1;i<5;i++){ const z=-.87+i*.348; g.add(mesh(B(.17,.16,.17),S2,1.07,.88,z)); g.add(mesh(B(.17,.16,.17),S2,-1.07,.88,z)); }
+  [[1.12,.92],[-1.12,.92],[1.12,-.92],[-1.12,-.92]].forEach(p=>{ g.add(mesh(C(.3,.33,1.35,10),S,p[0],.675,p[1])); g.add(mesh(K(.38,.62,10),R,p[0],1.66,p[1])); });
+  g.add(mesh(B(1.0,1.55,.9),S,0,.775,-.15));
+  const roof=mesh(K(.78,.95,4),R,0,2.02,-.15); roof.rotation.y=Math.PI/4; g.add(roof);
+  g.add(door(.46,.56,0,.28,.955,0x4a3b2a));
+  g.add(win(.16,.24,-.25,1.15,.305)); g.add(win(.16,.24,.25,1.15,.305));
+  g.add(mesh(C(.015,.015,.55,5),M(0x6b5a45),0,2.77,-.15));
+  const flag=new T.Group(); flag.position.set(0,2.93,-.15);
+  const fp=mesh(new T.PlaneGeometry(.38,.22),M(0xc0513d,{side:T.DoubleSide}),.19,0,0); flag.add(fp); g.add(flag);
+  return {g,h:3.1,hit:[2.6,2.2],anim:(t,k)=>{ flag.rotation.y = Math.sin(t*3.2)*(.35+k*.4); }};
+}
+function bClock(c){
+  const g=new T.Group();
+  g.add(mesh(B(1.4,.34,1.4),M(0xe6e8ee),0,.17,0));
+  g.add(mesh(B(.92,2.6,.92),M(0xf0f2f6),0,1.64,0));
+  g.add(mesh(B(1.06,.14,1.06),M(c.deep),0,3.0,0));
+  const roof=mesh(K(.8,1.0,4),M(c.deep),0,3.57,0); roof.rotation.y=Math.PI/4; g.add(roof);
+  g.add(mesh(C(.02,.02,.4,5),M(0xc9a44a),0,4.27,0));
+  g.add(mesh(ICO(.07),M(0xe2b64a,{metalness:.3,roughness:.5}),0,4.5,0));
+  const faceM = glow(new T.MeshStandardMaterial({color:0xffffff,emissive:0xfff1c9,emissiveIntensity:0,flatShading:true}),0,.9);
+  const hands=[];
+  for(let k=0;k<4;k++){
+    const fg=new T.Group(); fg.rotation.y=k*Math.PI/2; fg.position.y=2.5;
+    const rim=mesh(C(.37,.37,.04,20),M(c.deep),0,0,.475); rim.rotation.x=Math.PI/2; fg.add(rim);
+    const face=mesh(C(.32,.32,.04,20),faceM,0,0,.495); face.rotation.x=Math.PI/2; fg.add(face);
+    const hp=new T.Group(); hp.position.z=.525; fg.add(hp);
+    const hh=new T.Group(); hh.add(mesh(B(.05,.18,.02),M(0x333844),0,.08,0)); hp.add(hh);
+    const mh=new T.Group(); mh.add(mesh(B(.034,.27,.02),M(0x333844),0,.12,0)); hp.add(mh);
+    hands.push([hh,mh]); g.add(fg);
+  }
+  g.add(win(.2,.36,0,1.25,.465)); g.add(win(.2,.36,.465,1.25,0,true));
+  g.add(win(.2,.36,0,1.25,-.465)); g.add(win(.2,.36,-.465,1.25,0,true));
+  g.add(door(.3,.5,0,.59,.465,0x495568));
+  return {g,h:4.6,hit:[1.5,1.5],anim:(t,k)=>{
+    const m=t*(.9+k*6), h=t*(.075+k*.5);
+    hands.forEach(p=>{ p[0].rotation.z=-h; p[1].rotation.z=-m; });
+  }};
+}
+const BUILDERS = {bank:bBank,diner:bDiner,station:bStation,tower:bTower,lighthouse:bLighthouse,
+  boutique:bBoutique,studio:bStudio,photo:bPhoto,castle:bCastle,clock:bClock};
+
+/* 煙 */
+const puffGeo = ICO(.1,0);
+function makePuffs(parent,n,origin,drift,rate){
+  const arr=[];
+  for(let i=0;i<n;i++){
+    const m=noPick(new T.Mesh(puffGeo,new T.MeshStandardMaterial({color:0xffffff,transparent:true,opacity:0,flatShading:true,roughness:1,depthWrite:false})));
+    parent.add(m); arr.push({m,k:i/n,o:origin.clone(),drift,rate});
+  }
+  return arr;
+}
+function runPuffs(arr,dt,emit){
+  for(const p of arr){
+    p.k += dt*p.rate;
+    if(p.k>=1){ p.k-=1; if(emit) p.o.copy(emit()); }
+    const k=p.k;
+    p.m.position.set(p.o.x+k*p.drift, p.o.y+k*1.1, p.o.z-k*p.drift*.4);
+    p.m.scale.setScalar(.7+k*1.8);
+    p.m.material.opacity = RM ? 0 : (k<.12 ? k/.12 : 1-(k-.12)/.88)*.75;
+  }
+}
+
+/* 建物を置く */
+const blds = {}, hitboxes = [];
+const hitMat = new T.MeshBasicMaterial({visible:false});
+ITEMS.forEach(it=>{
+  const c = {main:hx(it.tint), deep:hx(it.dp), deepS:it.dp};
+  const b = BUILDERS[it.bld](c);
+  const base = new T.Group(); base.position.set(it.x,0,it.z); base.rotation.y = it.rot;
+  base.add(b.g); world.add(base);
+  const hb = new T.Mesh(B(b.hit[0], b.h, b.hit[1]), hitMat);
+  hb.position.y = b.h/2; hb.userData.key = it.key; b.g.add(hb); hitboxes.push(hb);
+  b.base = base; b.lift = 0; blds[it.key] = b;
+});
+
+/* ---------------- 広場・道・木・池 ---------------- */
+const PLAZA = {x:.6,z:-.6,r:1.75};
+world.add(mesh(C(PLAZA.r,PLAZA.r,.06,28),M(0xebe4d5),PLAZA.x,.03,PLAZA.z));
+world.add(mesh(C(PLAZA.r+.12,PLAZA.r+.12,.04,28),M(0xd9cfbc),PLAZA.x,.02,PLAZA.z));
+const paths = [];
+ITEMS.forEach(it=>{
+  if(it.key==="teiki") return;
+  const dx=it.x-PLAZA.x, dz=it.z-PLAZA.z, L=Math.hypot(dx,dz);
+  const s=PLAZA.r-.1, e=L-1.15; if(e<=s) return;
+  const len=e-s, mx=PLAZA.x+dx/L*(s+len/2), mz=PLAZA.z+dz/L*(s+len/2);
+  const p=mesh(B(len,.04,.5),M(0xefe5cf),mx,.02,mz); p.rotation.y=Math.atan2(-dz,dx); p.castShadow=false; world.add(p);
+  paths.push({x1:PLAZA.x+dx/L*s,z1:PLAZA.z+dz/L*s,x2:PLAZA.x+dx/L*e,z2:PLAZA.z+dz/L*e});
+});
+function segDist(px,pz,s){
+  const vx=s.x2-s.x1, vz=s.z2-s.z1, t=Math.max(0,Math.min(1,((px-s.x1)*vx+(pz-s.z1)*vz)/(vx*vx+vz*vz)));
+  return Math.hypot(px-(s.x1+vx*t), pz-(s.z1+vz*t));
+}
+
+/* 街灯 */
+[35,125,215,305].forEach(a=>{
+  const r=a*Math.PI/180, x=PLAZA.x+Math.cos(r)*(PLAZA.r+.35), z=PLAZA.z+Math.sin(r)*(PLAZA.r+.35);
+  world.add(mesh(C(.03,.035,.78,6),M(0x4a4f5a),x,.39,z));
+  const h=mesh(ICO(.1),lampMat,x,.84,z); h.castShadow=false; world.add(h);
+});
+const plazaLight = new T.PointLight(0xffc27a,0,9,2); plazaLight.position.set(PLAZA.x,1.6,PLAZA.z); world.add(plazaLight);
+
+/* 池とアヒル */
+const POND = {x:4.95,z:4.5,r:1.05};
+world.add(mesh(C(POND.r,POND.r,.05,11),M(0x86c6e4,{roughness:.2,metalness:.1}),POND.x,.035,POND.z));
+{
+  const rnd=mulberry(5);
+  for(let i=0;i<12;i++){ const a=i/12*Math.PI*2+rnd()*.2, s=.1+rnd()*.08;
+    world.add(mesh(new T.DodecahedronGeometry(s,0),M(0xbdb6aa),POND.x+Math.cos(a)*(POND.r+.08),.04,POND.z+Math.sin(a)*(POND.r+.08))); }
+  [[.35,-.3],[-.4,.25]].forEach(p=>{ const l=mesh(C(.17,.17,.02,8),M(0x6fae62),POND.x+p[0],.07,POND.z+p[1]); l.castShadow=false; world.add(l); });
+}
+const duck=new T.Group();
+{ const bd=mesh(ICO(.13,0),M(0xffffff)); bd.scale.set(1.35,.8,1); duck.add(bd);
+  duck.add(mesh(ICO(.08,0),M(0xffffff),.13,.12,0));
+  duck.add(mesh(B(.08,.03,.05),M(0xf0a23a),.23,.11,0)); world.add(duck); }
+
+/* 木・花 */
+{
+  const rnd=mulberry(21), trees=[];
+  const blockers = ITEMS.map(it=>({x:it.x,z:it.z,r:{bank:1.75,diner:1.9,station:1.8,tower:1.15,lighthouse:1.25,boutique:1.45,studio:1.35,photo:1.4,castle:1.85,clock:0}[it.bld]}));
+  blockers.push({x:1.9,z:5.85,r:1.6},{x:.4,z:5.85,r:1.2},{x:3.3,z:5.85,r:1.0});
+  function ok(x,z,gap){
+    if(islandSD(x,z) > -.45) return false;
+    if(trackDist(x,z) < .78) return false;
+    if(Math.hypot(x-PLAZA.x,z-PLAZA.z) < PLAZA.r+.6) return false;
+    if(Math.hypot(x-POND.x,z-POND.z) < POND.r+.45) return false;
+    for(const b of blockers) if(Math.hypot(x-b.x,z-b.z) < b.r) return false;
+    for(const p of paths) if(segDist(x,z,p) < .5) return false;
+    for(const t of trees) if(Math.hypot(x-t.x,z-t.z) < gap) return false;
+    return true;
+  }
+  for(let n=0;n<900 && trees.length<52;n++){
+    const x=(rnd()*2-1)*7.6, z=(rnd()*2-1)*7.6;
+    if(ok(x,z,.72)) trees.push({x,z});
+  }
+  const greens=[0x86c46e,0x74b562,0x98cf7c], pines=[0x5f9f63,0x6aab6b];
+  trees.forEach(p=>{
+    const g=new T.Group(); g.position.set(p.x,0,p.z); const s=.75+rnd()*.55; g.scale.setScalar(s); g.rotation.y=rnd()*6.28;
+    g.add(mesh(C(.05,.07,.36,5),M(0x8b6547),0,.18,0));
+    if(rnd()<.62) g.add(mesh(ICO(.36),M(greens[Math.floor(rnd()*3)]),0,.62,0));
+    else { const col=M(pines[Math.floor(rnd()*2)]); g.add(mesh(K(.36,.55,6),col,0,.55,0)); g.add(mesh(K(.27,.45,6),col,0,.86,0)); }
+    world.add(g);
+  });
+  const fl=[0xff8fb1,0xffd166,0xffffff,0xb79ce8];
+  for(let n=0,c=0;n<500 && c<26;n++){
+    const x=(rnd()*2-1)*7.4, z=(rnd()*2-1)*7.4;
+    if(!ok(x,z,.35)) continue;
+    const f=mesh(ICO(.055),M(fl[c%4]),x,.06,z); f.castShadow=false; world.add(f); trees.push({x,z}); c++;
+  }
+}
+
+/* ---------------- 汽車 ---------------- */
+const STATION_S = 1.9 + TA;
+const cars = [];
+{
+  const blue=M(0x2f5f82), dark=M(0x33363d);
+  const loco=new T.Group();
+  loco.add(mesh(B(.8,.12,.36),dark,0,.14,0));
+  const boiler=mesh(C(.17,.17,.55,10),blue,.12,.34,0); boiler.rotation.z=Math.PI/2; loco.add(boiler);
+  loco.add(mesh(B(.34,.36,.42),blue,-.22,.4,0));
+  loco.add(mesh(B(.42,.05,.5),M(0x9fb8cc),-.22,.61,0));
+  loco.add(mesh(C(.05,.07,.2,8),dark,.3,.58,0));
+  const lw=win(.2,.12,-.22,.46,.215); loco.add(lw);
+  cars.push(loco);
+  for(let i=0;i<2;i++){
+    const car=new T.Group();
+    car.add(mesh(B(.8,.12,.36),dark,0,.14,0));
+    car.add(mesh(B(.84,.36,.42),M(0xf4efe4),0,.38,0));
+    car.add(win(.76,.12,0,.42,.215)); car.add(win(.76,.12,0,.42,-.215));
+    car.add(mesh(B(.9,.05,.48),M(0x9fb8cc),0,.59,0));
+    cars.push(car);
+  }
+  cars.forEach(c=>world.add(c));
+}
+let trainS = STATION_S + 1.4;
+const trainPuffs = makePuffs(world,8,new T.Vector3(),0,.9);
+const tmpV = new T.Vector3();
+function locoChimney(){ tmpV.set(.3,.72,0); cars[0].localToWorld(tmpV); return world.worldToLocal(tmpV.clone()); }
+
+/* ---------------- 雲 ---------------- */
+const clouds=[];
+{
+  const cm=new T.MeshStandardMaterial({color:0xffffff,flatShading:true,roughness:1,emissive:0xffffff,emissiveIntensity:.06});
+  const rnd=mulberry(3);
+  const spec=[[12,4.5,.9],[14,3.2,1.2],[11.5,5.6,.8],[15,4,1.4],[13,2.6,1],[9,-5.2,1.2],[10.5,-6.5,1.5]];
+  spec.forEach((s,i)=>{
+    const g=new T.Group();
+    [[0,0,0,.9],[.85,-.12,.2,.7],[-.85,-.16,.1,.65],[.3,.36,-.1,.62],[-.35,.3,.22,.55]].forEach(p=>{
+      const m=noPick(new T.Mesh(ICO(p[3],1),cm)); m.position.set(p[0],p[1],p[2]); g.add(m);
+    });
+    g.scale.setScalar(s[2]); scene.add(g);
+    clouds.push({g,r:s[0],y:s[1],a:rnd()*6.28,sp:(.02+rnd()*.03)*(i%2?1:-1)});
+  });
+}
+
+/* ================================================================
+   カメラと操作
+   ================================================================ */
+let yaw=0, yawGoal=0, yawVel=0, zoom=1, zoomGoal=1, baseZoom=1;
+function fit(){
+  const W=innerWidth, H=innerHeight, a=W/H;
+  const W0 = a<.8 ? 23.5 : 28, H0 = 24.5;
+  const half = Math.max(H0/2, (W0/2)/a);
+  camera.left=-half*a; camera.right=half*a; camera.top=half; camera.bottom=-half;
+  camera.updateProjectionMatrix();
+  renderer.setSize(W,H,false);
+}
+fit(); addEventListener("resize", fit);
+
+const goalT = new T.Vector3(), bp = new T.Vector3();
+const effZoom = () => zoomGoal*(focusKey?(innerWidth<=640?1.85:1.6):1);
+function goalTarget(){
+  if(!focusKey){ goalT.set(0,0,0).addScaledVector(UPV, innerWidth/innerHeight<.8 ? 1.6 : -.9); return goalT; }
+  const b=blds[focusKey]; b.base.getWorldPosition(bp); bp.y += b.h*.45;
+  const W=innerWidth, H=innerHeight, mobile = W<=640;
+  let px=0, py=0;
+  if(mobile){ const sh=Math.min(sheet.offsetHeight,H*.6); const free=H-sh-20; py = H/2 - free/2 - 10; }
+  else { const sw=sheet.offsetWidth+32; px = (W-sw)/2 - W/2; }
+  const wpp = (camera.top-camera.bottom)/effZoom()/H;
+  goalT.copy(bp).addScaledVector(RIGHT,-px*wpp).addScaledVector(UPV,-py*wpp);
+  return goalT;
+}
+
+const ray=new T.Raycaster(), ndc=new T.Vector2();
+function pickAt(x,y){
+  ndc.set(x/innerWidth*2-1, -(y/innerHeight)*2+1);
+  ray.setFromCamera(ndc,camera);
+  const h=ray.intersectObjects(hitboxes,false);
+  return h.length ? h[0].object.userData.key : null;
+}
+
+const pointers=new Map(); let down=null, dragging=false, pinch=null, lastMove=null;
+canvas.addEventListener("pointerdown",e=>{
+  canvas.setPointerCapture(e.pointerId);
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pointers.size===1){ down={x:e.clientX,y:e.clientY,t:performance.now()}; dragging=false; yawVel=0; }
+  if(pointers.size===2){ const p=[...pointers.values()]; pinch={d:Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y),z:zoomGoal}; dragging=true; }
+});
+canvas.addEventListener("pointermove",e=>{
+  const prev=pointers.get(e.pointerId);
+  if(!prev){ if(e.pointerType==="mouse") lastMove={x:e.clientX,y:e.clientY}; return; }
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pointers.size===2 && pinch){
+    const p=[...pointers.values()], d=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);
+    zoomGoal=Math.min(2.6,Math.max(.7,pinch.z*d/pinch.d)); return;
+  }
+  if(!down) return;
+  if(!dragging && Math.hypot(e.clientX-down.x,e.clientY-down.y)>6){ dragging=true; canvas.classList.add("dragging"); hoverKey=null; }
+  if(dragging){ const dx=e.clientX-prev.x; yaw+=dx*.0068; yawGoal=yaw; yawVel=dx*.0068; }
+});
+function endPointer(e){
+  const wasDown=down;
+  pointers.delete(e.pointerId);
+  if(pointers.size<2) pinch=null;
+  if(pointers.size===0){
+    canvas.classList.remove("dragging");
+    if(wasDown && !dragging && e.type==="pointerup"){
+      const k=pickAt(e.clientX,e.clientY);
+      if(k) openItem(k,null); else closeItem();
+    }
+    down=null; dragging=false;
+  }
+}
+canvas.addEventListener("pointerup",endPointer);
+canvas.addEventListener("pointercancel",endPointer);
+canvas.addEventListener("pointerleave",()=>{ lastMove=null; if(!pointers.size){ hoverKey=null; canvas.classList.remove("pointing"); } });
+canvas.addEventListener("wheel",e=>{ e.preventDefault(); zoomGoal=Math.min(2.6,Math.max(.7,zoomGoal*Math.exp(-e.deltaY*.0012))); },{passive:false});
+
+$("rotL").addEventListener("click",()=>{ yawVel=0; yawGoal-=Math.PI/2; });
+$("rotR").addEventListener("click",()=>{ yawVel=0; yawGoal+=Math.PI/2; });
+$("home").addEventListener("click",()=>{ closeItem(); yawVel=0; yawGoal=Math.round(yawGoal/(Math.PI*2))*Math.PI*2; zoomGoal=1; });
+document.addEventListener("keydown",e=>{
+  if(e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+  if(e.key==="ArrowLeft"){ yawVel=0; yawGoal-=Math.PI/2; }
+  if(e.key==="ArrowRight"){ yawVel=0; yawGoal+=Math.PI/2; }
+});
+
+/* ================================================================
+   毎フレーム
+   ================================================================ */
+const cD={sky:new T.Color(0xe8f3ff),gr:new T.Color(0xcbb99b),sun:new T.Color(0xfff1dc),win:new T.Color(0xcfe2ef)};
+const cN={sky:new T.Color(0x6d7cc0),gr:new T.Color(0x2a2340),sun:new T.Color(0x9fb2ff),win:new T.Color(0xffe2a4)};
+const beamMats = Object.values(blds).filter(b=>b.beamM).map(b=>b.beamM);
+function applyNight(k){
+  hemi.color.copy(cD.sky).lerp(cN.sky,k); hemi.groundColor.copy(cD.gr).lerp(cN.gr,k);
+  hemi.intensity=.58-.2*k; sun.color.copy(cD.sun).lerp(cN.sun,k); sun.intensity=.92-.55*k; amb.intensity=.1+.04*k;
+  winMat.color.copy(cD.win).lerp(cN.win,k); winMat.emissiveIntensity=k*1.05;
+  lampMat.emissiveIntensity=k*1.7; plazaLight.intensity=k*1.2;
+  glowMats.forEach(g=>{ g[0].emissiveIntensity=g[1]+(g[2]-g[1])*k; });
+  beamMats.forEach(m=>{ m.opacity=.025+.3*k; });
+}
+applyNight(nightK);
+
+const pinV = new T.Vector3(), pinSize = {}, pinY = {};
+addEventListener("resize",()=>{ for(const k in pinSize) delete pinSize[k]; });
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ for(const k in pinSize) delete pinSize[k]; });
+let last=performance.now(), t=0, pickDirty=0;
+function frame(now){
+  const dt=Math.min(.05,(now-last)/1000); last=now; t+=dt;
+  const ease=k=>RM?1:Math.min(1,dt*k);
+
+  if(Math.abs(yawVel)>.0004 && !dragging){ yaw+=yawVel; yawVel*=.92; yawGoal=yaw; }
+  else if(!dragging){ yaw+=(yawGoal-yaw)*ease(6); }
+  world.rotation.y=yaw;
+  world.position.y = RM ? 0 : Math.sin(t*.6)*.12;
+
+  zoom+=(effZoom()-zoom)*ease(5);
+  if(Math.abs(camera.zoom-zoom)>1e-4){ camera.zoom=zoom; camera.updateProjectionMatrix(); }
+  target.lerp(goalTarget(),ease(4));
+  camera.position.copy(target).addScaledVector(VIEW,60);
+
+  if(Math.abs(nightK-nightGoal)>.001){ nightK+=(nightGoal-nightK)*ease(2.5); applyNight(nightK); }
+
+  // 建物
+  for(const key in blds){
+    const b=blds[key], hot=(key===hoverKey||key===focusKey);
+    b.lift+=((hot?1:0)-b.lift)*ease(9);
+    b.g.position.y=b.lift*.32;
+    b.g.scale.setScalar(1+b.lift*.05);
+    if(b.anim) b.anim(RM?0:t,b.lift);
+    if(b.puffs) runPuffs(b.puffs,RM?0:dt,null);
+  }
+
+  // 汽車
+  if(!RM){
+    const mid=trainS-1.02;
+    let d=((mid-STATION_S)%TL+TL)%TL; if(d>TL/2) d-=TL;
+    const f=.12+.88*Math.min(1,Math.abs(d)/3.2);
+    trainS+=dt*1.5*f;
+  }
+  cars.forEach((c,i)=>{ const q=trackAt(trainS-i*1.02); c.position.set(q.x,.08,q.z); c.rotation.y=q.rot; });
+  runPuffs(trainPuffs,RM?0:dt,locoChimney);
+
+  floaters.forEach(f=>{ f.position.y=f.userData.float.y+(RM?0:Math.sin(t*.9+f.userData.float.ph)*.18); });
+
+  // アヒル
+  const da=t*.35; duck.position.set(POND.x+Math.cos(da)*.55,.08+Math.sin(t*2.2)*.012,POND.z+Math.sin(da)*.55); duck.rotation.y=-da-Math.PI/2;
+
+  // 雲
+  clouds.forEach(c=>{ if(!RM) c.a+=c.sp*dt; c.g.position.set(Math.cos(c.a)*c.r,c.y+Math.sin(t*.4+c.a)*.15,Math.sin(c.a)*c.r); });
+
+  // マウスで指している建物
+  if(lastMove && !down && ++pickDirty%2===0){
+    const k=pickAt(lastMove.x,lastMove.y);
+    if(k!==hoverKey && !(hoverKey && document.querySelector(".pin:hover,.chip:hover"))) hoverKey=k;
+    canvas.classList.toggle("pointing",!!k);
+  }
+
+  renderer.render(scene,camera);
+
+  // 名札（重なったら上にずらす）
+  const W=innerWidth, H=innerHeight, list=[];
+  for(const key in blds){
+    const b=blds[key];
+    pinV.set(0,b.h+.3,0); b.g.localToWorld(pinV); pinV.project(camera);
+    const sz=pinSize[key]||(pinSize[key]={w:pinEls[key].offsetWidth,h:pinEls[key].offsetHeight});
+    list.push({key,ax:(pinV.x*.5+.5)*W,ay:(-pinV.y*.5+.5)*H,w:sz.w,h:sz.h});
+  }
+  list.sort((a,b)=>b.ay-a.ay);
+  const placed=[];
+  for(const p of list){
+    p.l=p.ax-p.w/2; p.t=p.ay-9-p.h;
+    for(let n=0;n<8;n++){
+      let moved=false;
+      for(const q of placed){
+        if(p.l<q.l+q.w+4 && p.l+p.w+4>q.l && p.t<q.t+q.h+3 && p.t+p.h+3>q.t){ p.t=q.t-p.h-3; moved=true; }
+      }
+      if(!moved) break;
+    }
+    placed.push(p);
+    const el=pinEls[p.key], hot=(p.key===hoverKey||p.key===focusKey);
+    const sy=pinY[p.key]===undefined ? p.t : pinY[p.key]+(p.t-pinY[p.key])*ease(12);
+    pinY[p.key]=sy;
+    el.style.transform="translate("+p.l.toFixed(1)+"px,"+sy.toFixed(1)+"px)";
+    el.style.setProperty("--stem",Math.max(6,p.ay-(sy+p.h)).toFixed(1)+"px");
+    el.style.zIndex=hot?50:Math.round(p.ay);
+    el.classList.toggle("hot",hot);
+    el.classList.toggle("dim",!!focusKey && p.key!==focusKey);
+    chipEls[p.key].classList.toggle("hot",hot);
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
